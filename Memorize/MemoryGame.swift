@@ -26,7 +26,7 @@ struct MemoryGame<CardContent> where CardContent: Equatable{
             cards.append(Card(id: pairIndex * 2 + 1 ,content: content))
         }
         
-        self.cards.shuffle()
+        //self.cards.shuffle()
     }
     
     internal mutating func choose(_ card: Card){

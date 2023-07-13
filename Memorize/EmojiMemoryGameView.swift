@@ -13,17 +13,12 @@ struct EmojiMemoryGameView: View {
     
     var body: some View {
         VStack{
-            ScrollView {
-                LazyVGrid(columns: [GridItem(.adaptive(minimum: 80))]) {
-                    ForEach(viewmodel.cards) { card in
-                        CardView(card: card)
-                            .aspectRatio(2/3, contentMode: .fill)
-                            .onTapGesture {
-                                viewmodel.choose(card)
-                            }
+            AspectVGrid(items: viewmodel.cards, aspectRation: 2/3){ card in
+                CardView(card: card)
+                    .padding(4)
+                    .onTapGesture {
+                        viewmodel.choose(card)
                     }
-                }
-                
             }
             .foregroundColor(Color.red)
             
@@ -71,35 +66,49 @@ struct CardView: View {
             ZStack {
                 let shape = RoundedRectangle(cornerRadius: DrawingConstans.cornerRadius)
                 if card.isFaceUp {
+                    
                     shape.fill().foregroundColor(Color.white)
                     shape.strokeBorder(lineWidth: DrawingConstans.lineWidth)
-                    Circle().padding(5).opacity(0.5)
-                    Text(card.content)
-                        .font(Font.system(size: min(geometry.size.width, geometry.size.height) * DrawingConstans.fontScale))
+                    
+                    CircleShape(startAngle: Angle(degrees: 0 - 90), endAngle: Angle(degrees: 1 - 90)).padding(5).opacity(0.5)
+                    
                 } else if (card.isMatched){
                     shape.opacity(0)
                 } else {
                     shape.fill()
                 }
+                
+                Text(card.content)
+                    .rotationEffect(Angle.degrees(card.isMatched ? 360 : 0))
+                    .animation(Animation.linear(duration: 1).repeatForever(autoreverses: false))
+                    .font(Font.system(size: DrawingConstans.fontSize))
+                    .scaleEffect(scale(thatFits: geometry.size))
+                    .opacity(card.isFaceUp ? 1 : 0)
             }
         }
     }
-}
-
-private struct DrawingConstans {
-    static let cornerRadius: CGFloat = 15
-    static let lineWidth: CGFloat = 2
-    static let fontScale: CGFloat = 0.6
+    
+    private func scale(thatFits size: CGSize) -> CGFloat {
+        min(size.width, size.height) / (DrawingConstans.fontSize / DrawingConstans.fontScale)
+    }
+    
+    private struct DrawingConstans {
+        static let cornerRadius: CGFloat = 10
+        static let lineWidth: CGFloat = 2
+        static let fontScale: CGFloat = 0.6
+        static let fontSize: CGFloat = 32
+    }
 }
 
 
 struct ContentView_Previews: PreviewProvider {
     static var previews: some View {
         let game = EmojiMemoryGame()
-        EmojiMemoryGameView(viewmodel: game)
+        game.choose(game.cards.first!)
+        return EmojiMemoryGameView(viewmodel: game)
             .preferredColorScheme(.light)
-        EmojiMemoryGameView(viewmodel: game)
-            .preferredColorScheme(.dark)
+//        return EmojiMemoryGameView(viewmodel: game)
+//            .preferredColorScheme(.dark)
             
     }
 }
